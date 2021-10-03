@@ -18,7 +18,7 @@ module TcpHijacker
   # @param b_ip [String] The second IP, in decimal dot-notation (+1.2.3.4+)
   # @param port [Integer] The TCP port number to hijack
   # @return [Hijacking] the hijacking session
-  def self.for_connection(a_ip, b_ip, port, options = {})
+  def self.for_connection(a_ip, b_ip, port, options = { setup_netfilter: true, setup_arpspoof: true })
     # at first, we need to get the MAC addresses we need to send stuff to later
     a_mac = TcpHijacker.get_mac_for_ip a_ip
     b_mac = TcpHijacker.get_mac_for_ip b_ip
@@ -26,6 +26,8 @@ module TcpHijacker
     if options[:setup_netfilter]
       (queue_number, nf_cleanup) = TcpHijacker.setup_netfilter a_ip, b_ip
     else
+      raise "Need to provide nfqueue_number if setup_netfilter is false" unless options[:nfqueue_number]
+
       queue_number = options[:nfqueue_number]
     end
     arp_cleanup = TcpHijacker.setup_arpspoof a_ip, b_ip if options[:setup_arpspoof]
