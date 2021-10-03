@@ -18,20 +18,24 @@ module TcpHijacker
   # @param b_ip [String] The second IP, in decimal dot-notation (+1.2.3.4+)
   # @param port [Integer] The TCP port number to hijack
   # @return [Hijacking] the hijacking session
-  def self.for_connection(a_ip, b_ip, port)
+  def self.for_connection(a_ip, b_ip, port, options = {})
     # at first, we need to get the MAC addresses we need to send stuff to later
     a_mac = TcpHijacker.get_mac_for_ip a_ip
     b_mac = TcpHijacker.get_mac_for_ip b_ip
 
-    (queue_number, nf_cleanup) = TcpHijacker.setup_netfilter a_ip, b_ip
-    arp_cleanup = TcpHijacker.setup_arpspoof a_ip, b_ip
+    if options[:setup_netfilter]
+      (queue_number, nf_cleanup) = TcpHijacker.setup_netfilter a_ip, b_ip
+    else
+      queue_number = options[:nfqueue_number]
+    end
+    arp_cleanup = TcpHijacker.setup_arpspoof a_ip, b_ip if options[:setup_arpspoof]
 
     hijacker = TcpHijacker::Hijacking.new a_ip, a_mac, b_ip, b_mac, port, queue_number
 
     @@cleanup_tasks.push(proc do
       hijacker.terminate
-      arp_cleanup.call
-      nf_cleanup.call
+      arp_cleanup.call if options[:setup_arpspoof]
+      nf_cleanup.call if options[:setup_netfilter]
     end)
     hijacker
   end

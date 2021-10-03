@@ -127,12 +127,12 @@ module TcpHijacker
 
         # and now we can deliver this to packetfu for proper parsing
         parsed_packet = PacketFu::Packet.parse(eth_packet.to_s)
-        verdict = handle_recv_packet(parsed_packet)
+        verdict = handle_recv_packet(parsed_packet, packet)
         next verdict
       end
     end
 
-    def handle_recv_packet(parsed_packet)
+    def handle_recv_packet(parsed_packet, packet)
       if parsed_packet.ip_proto != TCP_PROTOCOL_NUM
         puts "Received a non TCP-packet. Is your netfilter setup incorrectly?"
         return Netfilter::Packet::ACCEPT
@@ -158,10 +158,10 @@ module TcpHijacker
       parsed_packet.tcp_seq += @tcp_sequence_delta[parsed_packet.ip_saddr]
       parsed_packet.tcp_ack -= @tcp_sequence_delta[parsed_packet.ip_daddr]
 
-      handle_packet_manupulation(parsed_packet)
+      handle_packet_manupulation(parsed_packet, packet)
     end
 
-    def handle_packet_manupulation(parsed_packet)
+    def handle_packet_manupulation(parsed_packet, packet)
       # and here we can now edit it
       payload_length_before = parsed_packet.payload.length
       verdict = Netfilter::Packet::ACCEPT
