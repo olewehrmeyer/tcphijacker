@@ -228,7 +228,7 @@ module TcpHijacker
       fake_ack.tcp_flags.ack = 1
       fake_ack.tcp_opts = @tcp_last_packet_stats[packet.ip_daddr][:tcp_options]
       fake_ack.tcp_win = @tcp_last_packet_stats[packet.ip_daddr][:tcp_window]
-      fake_ack.tcp_ack = @tcp_last_packet_stats[packet.ip_saddr][:real_seq] + packet.payload.length + @tcp_sequence_delta[packet.ip_saddr]
+      fake_ack.tcp_ack = @tcp_last_packet_stats[packet.ip_saddr][:real_seq] + 2 * packet.payload.length + @tcp_sequence_delta[packet.ip_saddr]
       fake_ack.tcp_seq = @tcp_last_packet_stats[packet.ip_daddr][:real_seq] + @tcp_sequence_delta[packet.ip_daddr]
       fake_ack.recalc
 
