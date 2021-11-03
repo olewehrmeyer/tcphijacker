@@ -50,6 +50,7 @@ module TcpHijacker
   # @see #self.for_connection
   def self.terminate
     @@cleanup_tasks.each(&:call)
+    @@cleanup_tasks = []
   end
 
   # Uses +arpspoof+ binary to redirect traffic between the provided IP addresses over this machine.
